@@ -13,7 +13,20 @@ fake = Faker()
 
 # Initialize with 100 sample employee records
 def init_db():
+    try:
+        # Try reading to check if table exists
         pd.read_sql("SELECT * FROM employees", engine)
+    except:
+        data = {
+            "first_name": [fake.first_name() for _ in range(100)],
+            "last_name": [fake.last_name() for _ in range(100)],
+            "position": [random.choice(["Engineer", "Manager", "Analyst", "Clerk", "HR"]) for _ in range(100)],
+            "salary": [round(random.uniform(30000, 120000), 2) for _ in range(100)],
+            "start_date": [fake.date_between(start_date='-5y', end_date='today') for _ in range(100)],
+            "department": [random.choice(["IT", "Finance", "HR", "Marketing", "Operations"]) for _ in range(100)],
+        }
+        df = pd.DataFrame(data)
+        df.to_sql("employees", engine, index=False, if_exists="replace")
 
 init_db()
 

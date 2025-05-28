@@ -34,6 +34,10 @@ class Employee(BaseModel):
     start_date: str  # Could be validated as date
     department: str
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Employee API"}
+
 @app.post("/upload_json")
 def upload_json(data: List[Employee]):
     global employee_df

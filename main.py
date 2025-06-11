@@ -9,6 +9,8 @@ app = FastAPI()
 # In-memory DataFrame
 employee_df = pd.DataFrame(columns=["first_name", "last_name", "position", "salary", "start_date", "department"])
 
+db2 = pd.read_excel(db2.xlsx)
+
 # Sample Data Generator (optional)
 def generate_sample_data():
     global employee_df
@@ -58,3 +60,9 @@ async def upload_csv(file: UploadFile = File(...)):
 @app.get("/employees")
 def get_employees():
     return employee_df.to_dict(orient="records")
+
+
+@app.get("/db2")
+def get_db2():
+    global db2
+    return db2.to_dict(orient="records")

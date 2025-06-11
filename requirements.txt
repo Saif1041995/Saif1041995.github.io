@@ -5,3 +5,4 @@ sqlalchemy
 databases
 python-multipart
 gunicorn
+openpyxl

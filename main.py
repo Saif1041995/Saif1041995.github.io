@@ -61,5 +61,5 @@ def get_employees():
 
 
 @app.get("/employees_df")
-def get_employees():
-    return employee_df
+def get_employees_df():
+    return employee_df.to_json(orient="records")

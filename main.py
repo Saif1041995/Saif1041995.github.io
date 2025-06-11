@@ -9,7 +9,7 @@ app = FastAPI()
 # In-memory DataFrame
 employee_df = pd.DataFrame(columns=["first_name", "last_name", "position", "salary", "start_date", "department"])
 
-db2 = pd.read_excel(db2.xlsx)
+db2 = pd.read_excel("db2.xlsx")
 
 # Sample Data Generator (optional)
 def generate_sample_data():

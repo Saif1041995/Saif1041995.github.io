@@ -58,8 +58,3 @@ async def upload_csv(file: UploadFile = File(...)):
 @app.get("/employees")
 def get_employees():
     return employee_df.to_dict(orient="records")
-
-
-@app.get("/employees_df")
-def get_employees_df():
-    return employee_df

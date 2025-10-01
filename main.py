@@ -1,54 +1,42 @@
-from fastapi import FastAPI, UploadFile, File
-from pydantic import BaseModel
-from typing import List
+# main.py
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
 import pandas as pd
-import io
 import os
 
-app = FastAPI()
+app = FastAPI(title="Excel Transfer API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], allow_headers=["*"], allow_methods=["*"]
+)
 
-# Load db2.xlsx if exists
-db2 = pd.DataFrame()
-if os.path.exists("data_uploaded.xlsx"):
-    db2 = pd.read_excel("data_uploaded.xlsx")
+DATA_DIR = Path("data"); DATA_DIR.mkdir(exist_ok=True)
 
-# Load employees.csv if exists
-CSV_PATH = "db.xlsx"
-employee_df = pd.read_excel(CSV_PATH)
+def safe(n: str) -> str: return os.path.basename(n)
 
-# JSON schema for employee
-class Employee(BaseModel):
-    set_id: int
-    name: str
-    year: int
-    theme: str
-    subtheme: str
-    themeGroup: str
-    category: str
-    pieces: float	
-    minifigs: float	
-    agerange_min: float	
-    US_retailPrice: float	
-    bricksetURL	: str
-    thumbnailURL: str
-    imageURL : str
-    
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the data transfer API"}
+@app.get("/health")
+def health(): return {"status": "ok"}
 
-@app.get("/db")
-def get_employees():
-    return employee_df.to_dict(orient="records")
+@app.post("/upload")
+async def upload_excel(file: UploadFile = File(...)):
+    name = safe(file.filename)
+    if not name.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(400, "Upload .xlsx or .xls")
+    dest = DATA_DIR / name
+    with dest.open("wb") as f: f.write(await file.read())
+    return {"ok": True, "filename": name}
 
-@app.get("/db2")
-def get_db2():
-    return db2.to_dict(orient="records")
+@app.get("/download/{filename}")
+def download(filename: str):
+    p = DATA_DIR / safe(filename)
+    if not p.exists(): raise HTTPException(404, "Not found")
+    return FileResponse(p, filename=p.name)
 
-@app.post("/upload_data")
-async def upload_csv(file: UploadFile = File(...)):
-    global employee_df
-    content = await file.read()
-    df = pd.read_csv(io.StringIO(content.decode("utf-8")))
-    employee_df = pd.concat([employee_df, df], ignore_index=True)
-    return {"status": "success", "rows_added": len(df), "total_rows": len(employee_df)}
+@app.get("/excel/{filename}/json")
+def to_json(filename: str, sheet: int | str | None = None, nrows: int | None = None):
+    p = DATA_DIR / safe(filename)
+    if not p.exists(): raise HTTPException(404, "Not found")
+    df = pd.read_excel(p, sheet_name=sheet if sheet is not None else 0, nrows=nrows)
+    return JSONResponse(df.to_dict(orient="records"))

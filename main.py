@@ -37,3 +37,8 @@ async def delete_file(filename: str):
     
     os.remove(file_path)
     return {"message": f"File '{filename}' deleted successfully"}
+
+@app.get("/files/")
+async def list_files():
+    files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")]
+    return {"files": files, "count": len(files)}

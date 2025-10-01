@@ -21,6 +21,11 @@ def get_db():
     df = pd.read_csv("data_uploaded.csv")
     return JSONResponse(df.to_dict(orient="records"))
 
+@app.get("/get_db2")
+def get_db():    
+    df = pd.read_csv("db.xlsx")
+    return JSONResponse(df.to_dict(orient="records"))
+
 @app.get("/health")
 def health(): return {"status": "ok"}
 
@@ -45,4 +50,5 @@ def to_json(filename: str, sheet: int | str | None = None, nrows: int | None = N
     if not p.exists(): raise HTTPException(404, "Not found")
     df = pd.read_excel(p, sheet_name=sheet if sheet is not None else 0, nrows=nrows)
     return JSONResponse(df.to_dict(orient="records"))
+
 

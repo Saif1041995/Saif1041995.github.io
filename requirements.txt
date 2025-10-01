@@ -1,8 +1,6 @@
 fastapi
 uvicorn[standard]
 pandas
-sqlalchemy
-databases
-python-multipart
-gunicorn
 openpyxl
+python-multipart
+# (optional) gunicorn
